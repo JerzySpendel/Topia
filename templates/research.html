@@ -1,0 +1,13 @@
+<html>
+<head><meta></meta>
+<body>
+<table border="1" bordercolor="#FFCC00" style="background-color:#FFFFCC" width="100%" cellpadding="3" cellspacing="3">
+	{% for science in researches %}
+	<tr>
+		<td>{{science.name}}</td>
+		<td>{{science.level}}</td>
+		<td>{{science.cost}}</td>
+		<td><button>Upgrade</button></td>
+	</tr>
+	{% endfor %}
+</table>

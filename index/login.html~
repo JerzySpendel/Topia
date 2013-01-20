@@ -1,0 +1,17 @@
+<html><head><meta></meta></head><body>
+<form action="/index/register/" method="post">
+{% csrf_token %}
+<div class = "fieldWrapper">
+{{form.login.errors }}
+<label for="id_login">Login: </label>
+{{form.login}}
+</div>
+<div class = "fieldWrapper">
+{{form.password.errors }}
+<label for="password_login">Password: </label>
+{{form.password}}
+</div>
+<input type="submit" value="Submit" />
+</form>
+</body>
+</html>

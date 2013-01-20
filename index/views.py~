@@ -1,0 +1,66 @@
+# Create your views here.
+from django.http import HttpResponse
+from django.template import Context, loader
+from django.http import Http404
+from django import forms
+from index.utilities import *
+from django.shortcuts import render
+from index.models import *
+import hashlib
+from datetime import datetime
+from index.validators import validate_password
+from django.core.mail import send_mail
+class RegisterForm(forms.Form):
+    login = forms.CharField(max_length=20)
+    password= forms.CharField(max_length=50,validators=[validate_password])
+    email = forms.EmailField()
+class LoginForm(forms.Form):
+  login = forms.CharField(max_length=20)
+  password = forms.CharField(max_length=50)
+def index(request):
+  return render(request,'index.html')
+def register(request):
+  template = loader.get_template('register.html')
+  if request.method == "POST":
+    form = RegisterForm(request.POST)
+    if form.is_valid():
+      login = request.POST['login']
+      password = md5(str(request.POST['password']))
+      email = request.POST['email']
+      user = User(login=login,activated=False,pass_md5=password,empire_name='',population=0,reg_date=datetime.now(),left_right_pointer=0.0,money=0,pop_money=10000000)
+      code = link()
+      user.save()
+      activation = Activation(code=code,email=email)
+      activation.usr = user
+      activation.save()
+      print(email)
+      activating_link = "212.106.166.37:8000/index/activation/"+code
+      send_mail("KURDE NOOOOOO",activating_link,"jspendel@gmail.com",[email],fail_silently=False)
+      return HttpResponse("User {0} has been registered, activation code: {1}".format(login,code))
+  else:
+      form = RegisterForm()
+  return render(request, 'register.html', {'form':form, })
+def login(request):
+  if request.method == "POST":
+    login = request.POST['login']
+    password = md5(request.POST['password'])
+    usr = User.objects.get(login=login)
+    if usr.pass_md5 == password and usr.activated:
+      request.session['login'] = login
+      return HttpResponse("Poprawne dane")
+    else:
+      return HttpResponse("Niepoprawne haslo badz konto nieaktywowane")
+  else:
+    return render(request,"login.html",{'form':LoginForm()})
+def activation(request,link):
+  if len(link)<10:
+    return HttpResponse("Wrong link")
+  else:
+    act = Activation.objects.get(code=link)
+    user = act.usr;
+    user.activated = True
+    user.save()
+    act.delete()
+    return HttpResponse("User {0} has been activated".format(user.login))
+  
+  
